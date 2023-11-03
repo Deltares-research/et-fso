@@ -175,18 +175,16 @@ def objective_function(
             pd.DataFrame({"loss": np.nan, "Current point in function space": [point]}),
             result_tracker_df,
         )
-    
-    print(point_tf[parameter_names[0]].loc[0])
-    print(result_tracker_df["x1"].values)
-    print(point_tf[parameter_names[0]].loc[0] in result_tracker_df["x1"].values)
+
     if point_tf[parameter_names[0]].loc[0] in result_tracker_df["x1"].values:
         print("Function already chosen before, choosing new function \n")
         result_tracker_df = add_to_dataframe(
             result_tracker_df,
             result_tracker_df.loc[
                 result_tracker_df["x1"] == point_tf[parameter_names[0]].loc[0]
-                ].iloc[0])
-        
+            ].iloc[0],
+        )
+
         if result_tracker_df["loss_run"].loc[len(result_tracker_df) - 1] == -9999.0:
             loss = np.nan
         else:

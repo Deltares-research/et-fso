@@ -280,7 +280,7 @@ def evaluate_basins(
 
     if run_type == "training":
         functions = pd.DataFrame({"KsatHorFrac": functions["best_x1"]})
-        functions = functions["KsatHorFrac"].loc[counter - 1]
+        functions = functions["KsatHorFrac"].loc[counter]
     elif run_type == "test":
         functions = functions["KsatHorFrac"].loc[0]
 
