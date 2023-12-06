@@ -20,39 +20,34 @@ from matplotlib.gridspec import GridSpec
 # The initial settings
 # -------------------------------------------------------------------------------- #
 # Provide the csv file with the benchmark results
-benchmark_csv_filename = "p:/11209205-034-et-fso/Verification/Results_Benchmark_Methods.csv"
-
-# TODO: add this to the script as well
-# Provide the csv file with the FSO results
-# fso_csv_filename = "p:/11209205-034-et-fso/Verification/Results_FSO_validation.csv"
+benchmark_csv_filename = "p:/11209205-034-et-fso/Verification/Results_Benchmark_Methods_Optimization2_30trainingbasins.csv"
 
 # Also provide the csv with the lat-lon locations of the discharge gauges
 gauge_info_csv = "p:/11206558-across/GB/CAMELS-GB/CAMELS_GB_topographic_attributes.csv"
 
 # Define the list of methods to loop trough
-methods = ["ksathorfrac100","ksathorfrac_AXA","ksathorfrac_RF","ksathorfrac_BRT"]
+methods = ["ksathorfrac100","ksathorfrac_AXA","ksathorfrac_RF","ksathorfrac_BRT","Test2_30trainingbasins"]
 
 # Define which KGE is used (options are kge_orig and kge_modified)
-used_kge_metric = "kge_orig"
+used_kge_metric = "kge_modified" #kge_orig
 
 # Give the shapefile of the UK
 uk_shape = "c:/Users/imhof_rn/OneDrive - Stichting Deltares/Documents/SITO/Enabling_Technologies/FSO/ET-FSO-2023/UK_shape"
 
 # Define the output filename where the resulting map will be stored
-output_filename = "p:/11209205-034-et-fso/Verification/Figs/KGE_comparison_map_kge_orig.csv"
-# output_filename = "p:/11209205-034-et-fso/Verification/Figs/KGE_comparison_map_kge_modified.csv"
+# outputfile = "p:/11209205-034-et-fso/Verification/Figs/KGE_comparison_map_kge_origTest2_30trainingbasins.png"
+outputfile = "p:/11209205-034-et-fso/Verification/Figs/KGE_comparison_map_kge_modified_origTest2_30trainingbasins.png"
 
 # Finally, also provide the text files of the color maps used in Crameri et al. (2020),
 # Nature Communications
 imola_colormap = "c:/Users/imhof_rn/OneDrive - Stichting Deltares/Documents/PhD/ScientificColourMaps6/imola/DiscretePalettes/imola50.txt"
+
 
 # -------------------------------------------------------------------------------- #
 # Open all results
 # -------------------------------------------------------------------------------- #
 # Read the benchmark results
 df_benchmark_results = pd.read_csv(benchmark_csv_filename)
-#TODO: read the FSO results
-# df_fso_results = pd.read_csv(fso_csv_filename)
 
 # Also open the csv with the gauge info
 df_gauge_info = pd.read_csv(gauge_info_csv)
@@ -72,12 +67,11 @@ for method in methods:
     results_for_plotting[method] = np.array(
         df_benchmark_results[f"{method}_{used_kge_metric}"]
     )
-#TODO: remove this once the results are there..
-results_for_plotting["ksathorfrac_FSO"] = results_for_plotting[method].copy()
-# results_for_plotting["ksathorfrac_FSO"] = np.array(df_fso_results[used_kge_metric])
 
-methods.append("ksathorfrac_FSO")
-
+# For our information, plot the average KGE value
+for method in methods:
+    print(f"Mean KGE {method} is: ")
+    print(np.nanmean(results_for_plotting[method]))
 
 # -------------------------------------------------------------------------------- #
 # Also calculate the difference between the methods and the KsatHorFrac 100 run
@@ -195,7 +189,10 @@ for i, method in enumerate(methods):
 
     # Add a title to each subplot
     if i < 5:
-        ax.set_title(f'Results for {method}', fontsize=15)
+        if method == "Test2_30trainingbasins":
+            ax.set_title(f'Results for FSO', fontsize=15)
+        else:
+            ax.set_title(f'Results for {method}', fontsize=15)
     else:
         ax.set_title(f'Difference', fontsize=15)
 
@@ -242,6 +239,6 @@ fig.legend(
     fontsize=12,
     )     
 
-# plt.savefig(outfile)
-# plt.close()                
-plt.show()
+plt.savefig(outputfile)
+plt.close()                
+# plt.show()
