@@ -189,14 +189,14 @@ def create_wflow_para(transfer_functions, l0, parameter_bounds, parameter_names)
             )
         elif type(transfer_functions) is str:
             new_wflow_para[p] = evaluate_function_from_string(transfer_functions, l0=l0)
-            new_wflow_para[p] = np.round(
-                rescale(
-                    new_wflow_para[p],
-                    from_range=[-11, 11],
-                    to_range=parameter_bounds[p],
-                ),
-                2,
-            )
+        new_wflow_para[p] = np.round(
+            rescale(
+                new_wflow_para[p],
+                from_range=[-11, 11],
+                to_range=parameter_bounds[p],
+            ),
+            2,
+        )       
 
     return new_wflow_para
 
@@ -293,14 +293,16 @@ def evaluate_basins(
         parameter_bounds=parameter_bounds,
         parameter_names=parameter_names,
     )
-
+    
+    # Ensure that new_wflow_para has values above zero. 
+    
     KGE_model_run_train = []
     KGE_model_run_test = []
 
     # TODO: Look at where and when to write uk_tif_path (dds opti or fso?)
     path = pathlib.Path(__file__).parent.parent.parent.resolve()
 
-    example_tif = path / "Data/spatial_predictors"
+    example_tif = path / "Data/spatial_predictors/BD/VK_BD_wavg_250m.tif"
     uk_tif_path = pathlib.Path(f"./KsatHorFrac_{str(counter+1).zfill(4)}.tif")
     try:
         os.remove(uk_tif_path)
@@ -329,6 +331,7 @@ def evaluate_basins(
     # Determine KGE (loop of in KGE functie loop)
     for training_basin_file in pathlib.Path(training_basin_folder_name).glob("*"):
         training_basin = training_basin_file.stem
+        print(training_basin)
         Q_obs_file = (
             Q_obs_folder
             / f"CAMELS_GB_hydromet_timeseries_{training_basin}_19701001-20150930.csv"
@@ -380,6 +383,7 @@ def evaluate_basins(
         # Determine KGE (loop of in KGE functie loop)
         for test_basin_file in pathlib.Path(test_basin_folder_name).glob("*"):
             test_basin = test_basin_file.stem
+            print(test_basin)
             Q_obs_file = (
                 Q_obs_folder
                 / f"CAMELS_GB_hydromet_timeseries_{test_basin}_19701001-20150930.csv"
@@ -416,7 +420,8 @@ def evaluate_basins(
             {
                 "mean training KGE": np.round(mean_train_KGE, 3),
                 "mean test KGE": np.round(mean_test_KGE, 3),
-            }
+            },
+            index=[0]
         )
 
         test_results = pd.DataFrame(
@@ -425,7 +430,8 @@ def evaluate_basins(
                 "weighted_mean_KGE": np.round(test_evaluation["wmean_KGE"], 3),
                 "SPAEF/model_loss": np.round(test_evaluation["model_loss"], 3),
                 "full_loss": np.round(test_evaluation["full_loss"], 3),
-            }
+            },
+            index=[0]
         )
 
         total_results = pd.DataFrame(
@@ -434,7 +440,8 @@ def evaluate_basins(
                 "weighted_mean_KGE": np.round(total_evaluation["wmean_KGE"], 3),
                 "SPAEF/model_loss": np.round(total_evaluation["model_loss"], 3),
                 "full_loss": np.round(total_evaluation["full_loss"], 3),
-            }
+            },
+            index=[0]
         )
 
         results = {
@@ -493,7 +500,7 @@ def FSO_setup():
     print("\nCase study is setup as defined in Functions/case_study_setup.\n")
     run_folder = src_path / "UK_basins"
 
-    training_basin_folder_name = run_folder / "Training_small"
+    training_basin_folder_name = run_folder / "Training_small_v2"
     test_basin_folder_name = run_folder / "Test"
 
     # 2. Information about the observations
@@ -652,40 +659,44 @@ def FSO(
     # convert_1d_array_to_tiff(
     #     new_wflow_para["KsatHorFrac"].values, example_tif, uk_tif_path
     # )
-    for try_n in range(100):
-        try:
-            results = dds_fs.dds_fs(
-                xbounds_df=xbounds_df,
-                num_iter=iterations,
-                obj_fun=DDS_optimization_wflow.objective_function,
-                test_number=test_number,
-                search_dim=len(parameter_names) * 6,
-                spatial_predictors=spatial_predictors,
-                parameter_bounds=parameter_bounds,
-                parameter_names=parameter_names,
-                result_tracker_df=result_tracker_df,
-                **args,
-            )[1]
-            dds_fs_error = None
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-            pass
+    # for try_n in range(100):
+    #     try:
+    #         results = dds_fs.dds_fs(
+    #             xbounds_df=xbounds_df,
+    #             num_iter=iterations,
+    #             obj_fun=DDS_optimization_wflow.objective_function,
+    #             test_number=test_number,
+    #             search_dim=len(parameter_names) * 6,
+    #             spatial_predictors=spatial_predictors,
+    #             parameter_bounds=parameter_bounds,
+    #             parameter_names=parameter_names,
+    #             result_tracker_df=result_tracker_df,
+    #             **args,
+    #         )[1]
+    #         dds_fs_error = None
+    #     except Exception as e:
+    #         print(e)
+    #         traceback.print_exc()
+    #         pass
 
-        if dds_fs_error:
-            time.sleep(1)
-        elif dds_fs_error is None:
-            break
-    # TODO: look at src_dir
+    #     if dds_fs_error:
+    #         time.sleep(1)
+    #     elif dds_fs_error is None:
+    #         break
+    # # TODO: look at src_dir
     src_dir = pathlib.Path(path)
-    runs = np.sum(results["n_iterations_used"])
-    results.attrs = {
-        "method": "dds",
-        "n_runs": runs,
-        "stringAsFactors": False,
-    }
-    results.to_csv(
-        src_dir
+    # runs = np.sum(results["n_iterations_used"])
+    # results.attrs = {
+    #     "method": "dds",
+    #     "n_runs": runs,
+    #     "stringAsFactors": False,
+    # }
+    # results.to_csv(
+    #     src_dir
+    #     / f"Test {str(test_number)[0]}/Test {test_number}/{optimizer}_wflow_optimization_{test_number}_run{run}.csv"
+    # )
+
+    results = pd.read_csv(src_dir
         / f"Test {str(test_number)[0]}/Test {test_number}/{optimizer}_wflow_optimization_{test_number}_run{run}.csv"
     )
 

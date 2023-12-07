@@ -175,16 +175,18 @@ def objective_function(
             pd.DataFrame({"loss": np.nan, "Current point in function space": [point]}),
             result_tracker_df,
         )
-
+    
+    print(point_tf[parameter_names[0]].loc[0])
+    print(result_tracker_df["x1"].values)
+    print(point_tf[parameter_names[0]].loc[0] in result_tracker_df["x1"].values)
     if point_tf[parameter_names[0]].loc[0] in result_tracker_df["x1"].values:
         print("Function already chosen before, choosing new function \n")
         result_tracker_df = add_to_dataframe(
             result_tracker_df,
             result_tracker_df.loc[
                 result_tracker_df["x1"] == point_tf[parameter_names[0]].loc[0]
-            ].iloc[0],
-        )
-
+                ].iloc[0])
+        
         if result_tracker_df["loss_run"].loc[len(result_tracker_df) - 1] == -9999.0:
             loss = np.nan
         else:
@@ -227,6 +229,7 @@ def objective_function(
     # Determine KGE (loop of in KGE functie loop)
     for training_basin_file in training_basin_folder_name.glob("*"):
         training_basin = training_basin_file.stem
+        print(training_basin)
         Q_obs_file = (
             Q_obs_folder
             / f"CAMELS_GB_hydromet_timeseries_{training_basin}_19701001-20150930.csv"
