@@ -140,7 +140,7 @@ def dds_fs(
         test_perturb[min_violation_idx] = xbounds_df["min"][min_violation_idx]
         test_perturb[max_violation_idx] = xbounds_df["max"][max_violation_idx]
         # Perturb the test vector
-        x_test = x_test + perturb_vec
+        x_test = test_perturb
 
         counter += 1
         print(f"\n****** Point nr. {counter} / {num_iter} ******\n")
