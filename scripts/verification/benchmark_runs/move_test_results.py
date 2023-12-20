@@ -14,13 +14,13 @@ import shutil
 # Initial settings
 # ----------------------------------------------------------------------- #
 # Provide the location with the results from Snellius
-input_folder = "p:/11209205-034-et-fso/Results/Optimization2_30trainingbasins/Test_runs"
+input_folder = "p:/11209205-034-et-fso/Results/Optimization1_14trainingbasins/Test_runs"
 
 # Give the output folder where all (benchmark) runs are stored
 output_folder = "p:/11209205-034-et-fso/UK_basins/Test"
 
 # Give the run a name
-run_name = "Test2_30trainingbasins"
+run_name = "Test1_14trainingbasins"
 
 
 # ----------------------------------------------------------------------- #

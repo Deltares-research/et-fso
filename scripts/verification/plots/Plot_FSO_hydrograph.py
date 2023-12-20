@@ -23,7 +23,7 @@ input_folder = "p:/11209205-034-et-fso/UK_basins/Test"
 input_folder_obs = "p:/11209205-034-et-fso/UK_basins/Obs"
 
 # Define the list of methods to loop through
-method = "Test2_30trainingbasins"
+method = "Test1_14trainingbasins"
 
 # Set the start and end time of the validation period
 start_time_test_validation = "1972-01-01 00:00:00"

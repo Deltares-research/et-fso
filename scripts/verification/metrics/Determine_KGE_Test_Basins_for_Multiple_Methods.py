@@ -25,16 +25,16 @@ input_folder = "p:/11209205-034-et-fso/UK_basins/Test"
 input_folder_obs = "p:/11209205-034-et-fso/UK_basins/Obs"
 
 # Define the list of methods to loop through
-methods = ["ksathorfrac100","ksathorfrac_AXA","ksathorfrac_RF","ksathorfrac_BRT","Test2_30trainingbasins"]
+methods = ["ksathorfrac100","ksathorfrac_AXA","ksathorfrac_RF","ksathorfrac_BRT","Test3_30trainingbasins"]
 # Give the folder name of the test run
-folder_test = "Test2_30trainingbasins"
+folder_test = "Test3_30trainingbasins"
 
 # Set the start and end time of the validation period
 start_time_test_validation = "1972-01-01 00:00:00"
 end_time_test_validation = "2009-12-31 00:00:00"
 
 # Define the output csv file name where the results will be stored
-output_csv_filename = "p:/11209205-034-et-fso/Verification/Results_Benchmark_Methods_Optimization2_30trainingbasins.csv"
+output_csv_filename = "p:/11209205-034-et-fso/Verification/Results_Benchmark_Methods_Optimization3_30trainingbasins.csv"
 
 
 # -------------------------------------------------------------------------------- #

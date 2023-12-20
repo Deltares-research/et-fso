@@ -20,12 +20,12 @@ l0 = FSO_functions.load_sp_wflow(
 )
 print("l0 loaded")
 
-parameter_bounds = {"KsatHorFrac": [0.1, 10000]}
+parameter_bounds = {"KsatHorFrac": [0.01, 10000]}
 print("Parameter bounds loaded")
 
 args = FSO_functions.FSO_setup()
 
-test_number = [1]
+test_number = [2]
 optimizer = ["DDS"]
 run = list(range(1, 2))
 
@@ -39,7 +39,7 @@ FSO_functions.FSO(
     optimizer=grid["optimizer"].loc[0],
     test_number=grid["test_number"].loc[0],
     run=grid["run"].loc[0],
-    iterations=10,
+    iterations=5000,
     spatial_predictors=l0,
     parameter_bounds=parameter_bounds,
     parameter_names=["KsatHorFrac"],

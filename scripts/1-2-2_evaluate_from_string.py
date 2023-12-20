@@ -18,28 +18,12 @@ def range01(x, bounds):
     maximum = np.nanmax(x)
     return (x - minimum) / (maximum - minimum)
 
-
-def load_sp_wflow(
-    path,
-    parameters,
-    bounds={
-        "silt": [350, 600],
-        "sand": [157, 437],
-        "clay": [133, 411],
-        "OC": [421, 1367],
-        "BD": [87, 123],
-        "pH": [49, 68],
-        "BL": [842, 1571],
-    },
-    scale=True,
-    nanapprox=False,
-) -> pd.DataFrame:
+def load_sp_wflow(path, parameters, bounds = {"silt": [350, 600], "sand": [157, 437], "clay": [133, 411], "oc": [421, 1367],
+                                               "bd": [87, 123], "ph": [49, 68], "bl": [842, 1571]}, scale=True, nanapprox=False) -> pd.DataFrame:
     path = pathlib.Path(path)
     spatial_predictors = {}
     for parameter in parameters:
-        src = rasterio.open(
-            path.joinpath(parameter + "/" + "VK_" + parameter + "_wavg_250m.tif")
-        )
+        src = rasterio.open(path.joinpath(parameter + "/" + "VK_" + parameter + "_wavg_250m.tif"))
         raster = src.read(1).astype(np.float64)
         nan_mask = src.read_masks(1)
         raster[nan_mask == 0] = np.nan
@@ -50,16 +34,15 @@ def load_sp_wflow(
                 i_l = int(np.clip(i - 1, 0, raster.shape[0] - 1))
                 i_h = int(np.clip(i + 1, 0, raster.shape[0] - 1))
                 raster[i, j] = np.nanmean([raster[i_l, j], raster[i_h, j]])
-
+        
         if scale:
             raster = range01(raster, bounds[parameter])
 
         raster[np.where(raster == 0)] = 0.0001
-
+        
         spatial_predictors[parameter] = raster.flatten()
     spatial_predictors = pd.DataFrame(spatial_predictors)
     return spatial_predictors
-
 
 def evaluate_function_from_string(string: str, l0: pd.DataFrame):
     """
@@ -88,7 +71,7 @@ def evaluate_function_from_string(string: str, l0: pd.DataFrame):
     func_string = re.sub("\^", "**", func_string)
 
     df = {}
-    locals_parameter = {"df": df, "l0": l0}
+    locals_parameter = {'df': df, 'l0': l0}
     names = []
     # Loop over parameters in l0 and add relevant parameter maps to dictionary df
     for i in l0.columns:
@@ -107,7 +90,6 @@ def evaluate_function_from_string(string: str, l0: pd.DataFrame):
         f_evaluated = f(df).values
     return f_evaluated
 
-
 def distribution_values_from_tf(tf, spatial_predictors, cut_off=None):
     """
     Function for computing the distribution of the values of the evaluated parameter map
@@ -123,26 +105,11 @@ def distribution_values_from_tf(tf, spatial_predictors, cut_off=None):
     if cut_off is not None:
         tf_evaluated[np.where(tf_evaluated < cut_off[0])] = cut_off[0]
         tf_evaluated[np.where(tf_evaluated > cut_off[1])] = cut_off[1]
-
-    dist = np.nanquantile(
-        tf_evaluated,
-        [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-        method="nearest",
-    ).reshape(1, 11)
+    
+    dist = np.nanquantile(tf_evaluated, [0, 0.1, 0.2, 0.3, 0.4, 0.5,
+                                         0.6, 0.7, 0.8, 0.9, 1], method='nearest').reshape(1, 11)
     distribution_values = np.round(dist, 4)
-    column_names = [
-        "min",
-        "10%",
-        "20%",
-        "30%",
-        "40%",
-        "mean",
-        "60%",
-        "70%",
-        "80%",
-        "90%",
-        "max",
-    ]
+    column_names = ["min", "10%", "20%", "30%", "40%", "mean", "60%", "70%", "80%", "90%", "max"]
     distribution_values = pd.DataFrame(distribution_values, columns=column_names)
 
     return distribution_values
@@ -151,46 +118,27 @@ def distribution_values_from_tf(tf, spatial_predictors, cut_off=None):
 if __name__ == "__main__":
     # Load parameter maps
     path = pathlib.Path("/gpfs/home4/aweerts/Data")
-    parameters = ["silt", "clay", "sand", "OC", "BD", "pH", "BL"]
+    print("Dit lukt nog")
+    parameters = ["silt", "clay", "sand", "oc", "bd", "ph", "bl"]
     spatial_predictors = load_sp_wflow(path.joinpath("spatial_predictors"), parameters)
-
+    print("Dit lukt ook nog")
     # Load generated function strings
-    functions_simple_10_numerics = pd.read_feather(
-        path.joinpath("functions_simple_10_numerics_pp.feather")
-    )
-    partial_function = partial(
-        distribution_values_from_tf, spatial_predictors=spatial_predictors
-    )
-
+    functions_simple_10_numerics = pd.read_feather(path.joinpath("functions_simple_10_numerics_pp.feather"))
+    functions_simple_10_numerics = functions_simple_10_numerics.iloc[int(len(functions_simple_10_numerics) / 2):]
+    
+    partial_function = partial(distribution_values_from_tf, spatial_predictors=spatial_predictors)
+    print("Dit lukt ook nog eens")
     # Create pools for parallel processing
-    p = mp.Pool(144)
+    p = mp.Pool(80)
     # Concatenate the parallely computed disttribution dataframes
-    result = pd.concat(
-        p.map(
-            partial_function,
-            functions_simple_10_numerics["TF_simple_10numerics"].values,
-        )
-    )
-    result.insert(
-        0,
-        column="transfer_function",
-        value=functions_simple_10_numerics["TF_simple_10numerics"].values,
-    )
-    result.reset_index(drop=True).to_feather(
-        path.joinpath(
-            "functions_simple_10_numerics_Distribution_indiv_scale_allBasins.feather"
-        )
-    )
+    result = pd.concat(p.map(partial_function, functions_simple_10_numerics["TF_simple_10numerics"].values))
+    result.insert(0, column='transfer_function', value=functions_simple_10_numerics["TF_simple_10numerics"].values)
+    result.reset_index(drop=True).to_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_allBasins_2.feather"))
 
-    generator_data = pd.read_feather(
-        path.joinpath("generator_data_simple_10numerics.feather")
-    )
-    tf_dist = pd.read_feather(
-        path.joinpath(
-            "functions_simple_10_numerics_Distribution_indiv_scale_allBasins.feather"
-        )
-    )
-
+    generator_data = pd.read_feather(path.joinpath("generator_data_simple_10numerics.feather"))
+    generator_data = generator_data.iloc[int(len(functions_simple_10_numerics) / 2):]
+    tf_dist = pd.read_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_allBasins_2.feather"))
+    
     generator_data = generator_data.dropna()
     tf_dist = tf_dist.dropna()
 
@@ -203,69 +151,29 @@ if __name__ == "__main__":
     tf_dist = tf_dist[~or_ind]
     generator_data = generator_data[~or_ind]
 
-    out_of_range = (
-        (tf_dist_recalc["max"] > threshold) & (tf_dist_recalc["min"] > threshold)
-    ) | ((tf_dist_recalc["max"] < -threshold) & (tf_dist_recalc["min"] < -threshold))
-
+    out_of_range = ((tf_dist_recalc["max"] > threshold) & (tf_dist_recalc["min"] > threshold)) | ((tf_dist_recalc["max"] < -threshold) & (tf_dist_recalc["min"] < -threshold))
+    
     tf_dist_recalc = tf_dist_recalc[~out_of_range]
     generator_data_recalc = generator_data_recalc[~out_of_range]
-
-    partial_function = partial(
-        distribution_values_from_tf,
-        spatial_predictors=spatial_predictors,
-        cut_off=[-threshold, threshold],
-    )
-    tf_distributions_recalc = pd.concat(
-        p.map(partial_function, tf_dist_recalc["transfer_function"])
-    )
+    
+    partial_function = partial(distribution_values_from_tf, spatial_predictors=spatial_predictors, cut_off=[-threshold, threshold])
+    tf_distributions_recalc = pd.concat(p.map(partial_function, tf_dist_recalc['transfer_function']))
 
     p.close()
 
-    tf_distributions_recalc.insert(
-        0, column="transfer_function", value=tf_dist_recalc["transfer_function"].values
-    )
+    tf_distributions_recalc.insert(0, column='transfer_function', value=tf_dist_recalc["transfer_function"].values)
 
-    pd.concat([tf_dist, tf_distributions_recalc], axis=0).reset_index(
-        drop=True
-    ).to_feather(
-        path.joinpath(
-            "functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins.feather"
-        )
-    )
-    pd.concat([generator_data, generator_data_recalc], axis=0).reset_index(
-        drop=True
-    ).to_feather(
-        path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins.feather")
-    )
+    pd.concat([tf_dist, tf_distributions_recalc], axis=0).reset_index(drop=True).to_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins_2.feather"))
+    pd.concat([generator_data, generator_data_recalc], axis=0).reset_index(drop=True).to_feather(path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins_2.feather"))
 
-    tf_dist = pd.read_feather(
-        path.joinpath(
-            "functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins.feather"
-        )
-    )
-    generator_data = pd.read_feather(
-        path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins.feather")
-    )
+    tf_dist = pd.read_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins_2.feather"))
+    generator_data = pd.read_feather(path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins_2.feather"))
 
-    extreme_tfs_ind = (
-        (tf_dist["min"] == -threshold)
-        & (tf_dist["10%"] == -threshold)
-        & (tf_dist["20%"] == -threshold)
-    ) | (
-        (tf_dist["80%"] == threshold)
-        & (tf_dist["90%"] == threshold)
-        & (tf_dist["max"] == threshold)
-    )
+    extreme_tfs_ind = ((tf_dist["min"] ==- threshold) & (tf_dist["10%"] == -threshold) & (tf_dist["20%"] == -threshold)) | ((tf_dist["80%"] == threshold) & (tf_dist["90%"] == threshold) & (tf_dist["max"] == threshold))
     tf_dist = tf_dist[~extreme_tfs_ind]
     generator_data = generator_data[~extreme_tfs_ind]
 
-    tf_dist.reset_index(drop=True).to_feather(
-        path.joinpath(
-            "functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins_no_extremes.feather"
-        )
-    )
-    generator_data.reset_index(drop=True).to_feather(
-        path.joinpath(
-            "generator_data_simple_10numerics_wrecalc_allBasins_no_extremes.feather"
-        )
-    )
+    tf_dist.reset_index(drop=True).to_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins_no_extremes_2.feather"))
+    generator_data.reset_index(drop=True).to_feather(path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins_no_extremes_2.feather"))
+
+

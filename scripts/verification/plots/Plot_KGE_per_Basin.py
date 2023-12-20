@@ -20,23 +20,23 @@ from matplotlib.gridspec import GridSpec
 # The initial settings
 # -------------------------------------------------------------------------------- #
 # Provide the csv file with the benchmark results
-benchmark_csv_filename = "p:/11209205-034-et-fso/Verification/Results_Benchmark_Methods_Optimization2_30trainingbasins.csv"
+benchmark_csv_filename = "p:/11209205-034-et-fso/Verification/Results_Benchmark_Methods_Optimization1_14trainingbasins.csv"
 
 # Also provide the csv with the lat-lon locations of the discharge gauges
 gauge_info_csv = "p:/11206558-across/GB/CAMELS-GB/CAMELS_GB_topographic_attributes.csv"
 
 # Define the list of methods to loop trough
-methods = ["ksathorfrac100","ksathorfrac_AXA","ksathorfrac_RF","ksathorfrac_BRT","Test2_30trainingbasins"]
+methods = ["ksathorfrac100","ksathorfrac_AXA","ksathorfrac_RF","ksathorfrac_BRT","Test1_14trainingbasins"]
 
 # Define which KGE is used (options are kge_orig and kge_modified)
-used_kge_metric = "kge_modified" #kge_orig
+used_kge_metric = "kge_orig" #"kge_modified"
 
 # Give the shapefile of the UK
 uk_shape = "c:/Users/imhof_rn/OneDrive - Stichting Deltares/Documents/SITO/Enabling_Technologies/FSO/ET-FSO-2023/UK_shape"
 
 # Define the output filename where the resulting map will be stored
-# outputfile = "p:/11209205-034-et-fso/Verification/Figs/KGE_comparison_map_kge_origTest2_30trainingbasins.png"
-outputfile = "p:/11209205-034-et-fso/Verification/Figs/KGE_comparison_map_kge_modified_origTest2_30trainingbasins.png"
+outputfile = "p:/11209205-034-et-fso/Verification/Figs/KGE_comparison_map_kge_origTest1_14trainingbasins.png"
+# outputfile = "p:/11209205-034-et-fso/Verification/Figs/KGE_comparison_map_kge_modified_Test1_14trainingbasins.png"
 
 # Finally, also provide the text files of the color maps used in Crameri et al. (2020),
 # Nature Communications
