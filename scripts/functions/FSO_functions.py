@@ -627,7 +627,7 @@ def FSO(
     print("start training")
 
     # TODO: not sure if 6 is correct. Originally was 18
-    xbounds_df = pd.DataFrame({"lower": np.full(6, -5), "upper": np.full(6, 5)})
+    xbounds_df = pd.DataFrame({"lower": np.full(6, -8), "upper": np.full(6, 8)})
     result_tracker_df = pd.DataFrame(
         {
             "best_x1": "init",
@@ -646,19 +646,8 @@ def FSO(
         },
         index=[0],
     )
-
-    # new_wflow_para = create_wflow_para(
-    #     transfer_functions="sand+1.2*clay",
-    #     l0=spatial_predictors,
-    #     parameter_bounds=parameter_bounds,
-    #     parameter_names=parameter_names,
-    #     )
     dds_fs_error = True
-    # uk_tif_path = pathlib.Path(f"./KsatHorFrac_{str(1).zfill(4)}.tif")
-    # example_tif = path / "Data/spatial_predictors/BD/VK_BD_wavg_250m.tif"
-    # convert_1d_array_to_tiff(
-    #     new_wflow_para["KsatHorFrac"].values, example_tif, uk_tif_path
-    # )
+    
     # for try_n in range(100):
     #     try:
     #         results = dds_fs.dds_fs(

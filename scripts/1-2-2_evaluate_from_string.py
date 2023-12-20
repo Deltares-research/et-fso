@@ -124,17 +124,20 @@ if __name__ == "__main__":
     print("Dit lukt ook nog")
     # Load generated function strings
     functions_simple_10_numerics = pd.read_feather(path.joinpath("functions_simple_10_numerics_pp.feather"))
+    functions_simple_10_numerics = functions_simple_10_numerics.iloc[int(len(functions_simple_10_numerics) / 2):]
+    
     partial_function = partial(distribution_values_from_tf, spatial_predictors=spatial_predictors)
     print("Dit lukt ook nog eens")
     # Create pools for parallel processing
-    p = mp.Pool(144)
+    p = mp.Pool(80)
     # Concatenate the parallely computed disttribution dataframes
     result = pd.concat(p.map(partial_function, functions_simple_10_numerics["TF_simple_10numerics"].values))
     result.insert(0, column='transfer_function', value=functions_simple_10_numerics["TF_simple_10numerics"].values)
-    result.reset_index(drop=True).to_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_allBasins.feather"))
+    result.reset_index(drop=True).to_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_allBasins_2.feather"))
 
     generator_data = pd.read_feather(path.joinpath("generator_data_simple_10numerics.feather"))
-    tf_dist = pd.read_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_allBasins.feather"))
+    generator_data = generator_data.iloc[int(len(functions_simple_10_numerics) / 2):]
+    tf_dist = pd.read_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_allBasins_2.feather"))
     
     generator_data = generator_data.dropna()
     tf_dist = tf_dist.dropna()
@@ -160,17 +163,17 @@ if __name__ == "__main__":
 
     tf_distributions_recalc.insert(0, column='transfer_function', value=tf_dist_recalc["transfer_function"].values)
 
-    pd.concat([tf_dist, tf_distributions_recalc], axis=0).reset_index(drop=True).to_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins.feather"))
-    pd.concat([generator_data, generator_data_recalc], axis=0).reset_index(drop=True).to_feather(path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins.feather"))
+    pd.concat([tf_dist, tf_distributions_recalc], axis=0).reset_index(drop=True).to_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins_2.feather"))
+    pd.concat([generator_data, generator_data_recalc], axis=0).reset_index(drop=True).to_feather(path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins_2.feather"))
 
-    tf_dist = pd.read_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins.feather"))
-    generator_data = pd.read_feather(path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins.feather"))
+    tf_dist = pd.read_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins_2.feather"))
+    generator_data = pd.read_feather(path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins_2.feather"))
 
     extreme_tfs_ind = ((tf_dist["min"] ==- threshold) & (tf_dist["10%"] == -threshold) & (tf_dist["20%"] == -threshold)) | ((tf_dist["80%"] == threshold) & (tf_dist["90%"] == threshold) & (tf_dist["max"] == threshold))
     tf_dist = tf_dist[~extreme_tfs_ind]
     generator_data = generator_data[~extreme_tfs_ind]
 
-    tf_dist.reset_index(drop=True).to_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins_no_extremes.feather"))
-    generator_data.reset_index(drop=True).to_feather(path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins_no_extremes.feather"))
+    tf_dist.reset_index(drop=True).to_feather(path.joinpath("functions_simple_10_numerics_Distribution_indiv_scale_wrecalc_allBasins_no_extremes_2.feather"))
+    generator_data.reset_index(drop=True).to_feather(path.joinpath("generator_data_simple_10numerics_wrecalc_allBasins_no_extremes_2.feather"))
 
 

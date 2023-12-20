@@ -44,8 +44,8 @@ def run_wflow_sbm_julia(basin_folder, run_type):
     # The shell script for the training set
     if run_type == "training":
         # The run settings
-        nr_cores = 8
-        nr_models_per_run = 7
+        nr_cores = 5
+        nr_models_per_run = 30
         # Get the cathment names
         catchment_names = os.listdir(basin_folder)
         # Split the basin folder in lists with a length of "nr_models_per_run"
@@ -64,14 +64,15 @@ def run_wflow_sbm_julia(basin_folder, run_type):
             ]
             # Add the folder path to the call argument
             call_argument = call_argument + folders_with_path
+            # print(call_argument)
             # Call the shell script to run wflow_sbm.jl
             subprocess.run(call_argument)
 
     # The shell script for the test set
     if run_type == "test":
         # The run settings
-        nr_cores = 8
-        nr_models_per_run = 5
+        nr_cores = 12
+        nr_models_per_run = 10
         # Get the cathment names
         catchment_names = os.listdir(basin_folder)
         # Split the basin folder in lists with a length of "nr_models_per_run"

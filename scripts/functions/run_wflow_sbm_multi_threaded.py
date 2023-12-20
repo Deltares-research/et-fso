@@ -71,8 +71,8 @@ def run_wflow_sbm_julia(basin_folder, run_type):
     # The shell script for the test set
     if run_type == "test":
         # The run settings
-        nr_cores = 8
-        nr_models_per_run = 5
+        nr_cores = 12
+        nr_models_per_run = 10
         # Get the cathment names
         catchment_names = os.listdir(basin_folder)
         # Split the basin folder in lists with a length of "nr_models_per_run"

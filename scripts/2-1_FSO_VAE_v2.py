@@ -17,7 +17,7 @@ tf.keras.utils.disable_interactive_logging()
 data_dir = pathlib.Path("/gpfs/home4/aweerts/Data")
 train_data_dir = pathlib.Path("/gpfs/home4/aweerts/Data/tfrecords_train")
 val_data_dir = pathlib.Path("/gpfs/home4/aweerts/Data/tfrecords_val")
-model_dir = pathlib.Path("/gpfs/home4/aweerts/VAE-Model")
+model_dir = pathlib.Path("/gpfs/home4/aweerts/VAE Model")
 
 index2word = pd.read_feather(data_dir.joinpath(
     "index2word_10numerics.feather")).iloc[0].astype(str).to_list()
@@ -215,11 +215,11 @@ class VAE:
     def vae_loss(self, y_true, y_pred):
         z_l_v = self.z_log_var
         z_m = self.z_mean
-        xent_loss = K.sum(tf.keras.backend.sparse_categorical_crossentropy(y_true, y_pred))
-        kl_loss = -0.5 * K.sum(1 + z_l_v - K.square(z_m) - K.exp(z_l_v), axis=-1)
-        xent_loss = K.mean(xent_loss)
-        kl_loss = K.mean(kl_loss)
-        return K.mean(xent_loss + kl_loss * kl_weight)
+        xent_loss = K.mean(tf.keras.backend.sparse_categorical_crossentropy(y_true, y_pred), axis=-1)
+        kl_loss = -0.5 * K.mean(1 + z_l_v - K.square(z_m) - K.exp(z_l_v), axis=-1)
+        # xent_loss = K.mean(xent_loss)
+        # kl_loss = K.mean(kl_loss)
+        return xent_loss + kl_loss * kl_weight
 
     def dist_MSE(self, y_true, y_pred):
         return tf.keras.losses.mean_squared_error(y_true, y_pred) * dist_weight
@@ -231,7 +231,7 @@ with strategy.scope():
     vae = VAE()
 
     csv_logger = tf.keras.callbacks.CSVLogger(
-        filename = model_dir.joinpath(f"training/FSO_VAE-ep{epochs}-bs{batch_size}-v2.csv")
+        filename = model_dir.joinpath(f"training/FSO_VAE-ep{epochs}-bs{batch_size}-v3.csv")
     )
 
     history = vae.model.fit(x=train_dataset,
@@ -239,6 +239,6 @@ with strategy.scope():
             validation_data=val_dataset,
             callbacks=[csv_logger])
     
-    vae.model.save_weights(model_dir.joinpath(f"training/FSO_VAE-weights-ep{epochs}-bs{batch_size}-v2.h5"))
+    vae.model.save_weights(model_dir.joinpath(f"training/FSO_VAE-weights-ep{epochs}-bs{batch_size}-v3.h5"))
 
 
