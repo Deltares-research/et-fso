@@ -175,7 +175,7 @@ dist_decoded = dist_decoder4(dist_decoder3(dist_decoder2(dist_decoder1(z))))
 autoencoder = tf.keras.models.Model([model_input, d], [decoded, dist_decoded])
 autoencoder.compile(optimizer="Adam", loss=losses)
 autoencoder.load_weights(
-    data_dir.joinpath("VAE Model/training/FSO_VAE-weights-ep200-bs1000-v1.h5")
+    data_dir.joinpath("VAE Model/training/FSO_VAE-weights-ep200-bs1000-v4.h5")
 )
 
 encoder = tf.keras.models.Model([model_input, d], z)
